@@ -1,16 +1,29 @@
 import { URL_REGEX } from "../constants";
 import { getProxiedUrl } from "../hostFns";
 import mongoose from "mongoose"
-export async function  rewriteUrls(body:string){
-   
+export async function rewriteUrls(body: string) {
 
-  
 
-    let output= body
 
-    for( const url of body.match(URL_REGEX) || []){
-        output= output.replace(url, await getProxiedUrl(url))
+
+    let output = body
+
+    const resolvedUrls: Record<string, string> = {}
+    const resolvableUrls: string[] = []
+    for (const url of body.match(URL_REGEX) || []) {
+
+        resolvableUrls.push(url)
     }
-    
-        return output
+
+    await Promise.all((body.match(URL_REGEX) || []).map(async (url) => {
+        const resolvedUrl = await getProxiedUrl(url)
+        resolvedUrls[url] = resolvedUrl
+    }))
+
+    for (const url of body.match(URL_REGEX) || []) {
+
+        output.replace(url, resolvedUrls[url])
+    }
+   
+    return output
 }

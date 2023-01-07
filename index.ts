@@ -120,8 +120,15 @@ async function start() {
 
                     res.writeHead(proxyRes.statusCode || 200, proxyRes.statusMessage, headers)
 
+                   
                     if (proxyRes.headers!['content-type']?.startsWith("text") || proxyRes.headers!['content-type']?.startsWith("application/json")) {
-                        const replacedBody = await rewriteUrls(Buffer.concat(body).toString())
+                        
+                        let replacedBody = await rewriteUrls(Buffer.concat(body).toString())
+                      
+                        if(proxyRes.headers!['content-type'].startsWith("text/html")){
+                           // replacedBody+="<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy.js'></script>"
+                           // replacedBody+="<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style.css'></link>"
+                        }
                         res.end(replacedBody)
                     }
                     else
@@ -130,15 +137,15 @@ async function start() {
 
             })
             proxy.on("error", (error) => {
-               // console.log({ url: `${req.headers.host}${req.url}`, message: `Proxy Error ${error.message} `, requestId })
+                console.log({ url: `${req.headers.host}${req.url}`, message: `Proxy Error ${error.message} `, requestId })
+                res.end("ERror Loading the page")
 
             })
         } catch (ex: any) {
             console.log({ url: `${req.headers.host}${req.url}`, message: `Caught Error ${ex.message} `, requestId })
             console.error(ex)
-            res.end("ERROR")
-            // res.write("Subdomain not found")
-            // res.end()
+            res.end("An error happened while loading the page")
+
         }
     });
 
