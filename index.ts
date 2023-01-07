@@ -23,7 +23,7 @@ const baseHost = PROXY_HOST
 //
 
 async function start() {
-    const uri = 'mongodb+srv://queueproxysite:NYZcfTzZGSYdPTLu@cluster0.t7syore.mongodb.net/test';
+    const uri = 'mongodb+srv://queueproxysite:NYZcfTzZGSYdPTLu@cluster0.t7syore.mongodb.net/test?maxPoolSize=10';
     await mongoose.connect(uri)
         .then(() => {
             console.log('Successfully connected to MongoDB');
@@ -56,7 +56,7 @@ async function start() {
         //request
         // and then proxy the request.
         const requestId = v4()
-        console.log({ url: `${req.headers.host}${req.url}`, message: "Started Processing url", requestId })
+        //console.log({ url: `${req.headers.host}${req.url}`, message: "Started Processing url", requestId })
         try {
             const target = await getHostForSubdomain(`${req.headers.host?.split(".")[0]}`)
 
@@ -106,7 +106,18 @@ async function start() {
                         proxyRes.headers["location"] = await getProxiedUrl(location)
                     }
 
-                    const { 'content-length': cl, ...headers } = proxyRes.headers
+                    const { 'content-length': cl, 'Access-Control-Allow-Origin':aco, ...headers } = proxyRes.headers
+
+                    headers["cache-control"] = "no-cache, no-store, must-revalidate"
+                    headers["pragma"] = "no-cache"
+                    headers['expires']= '0'
+                    headers['real-url']= `${target}${req.url}`
+                  
+                    headers['Access-Control-Allow-Origin']= req.headers.origin && req.headers.origin!=="" ?  (await getProxiedUrl(req.headers.origin)).replace(/\/$/,"") : "*"
+                    //This should be origin
+                    headers['Access-Control-Allow-Methods']= "GET,POST,PUT,DELETE,HEAD"
+                   
+
                     res.writeHead(proxyRes.statusCode || 200, proxyRes.statusMessage, headers)
 
                     if (proxyRes.headers!['content-type']?.startsWith("text") || proxyRes.headers!['content-type']?.startsWith("application/json")) {
@@ -119,7 +130,7 @@ async function start() {
 
             })
             proxy.on("error", (error) => {
-                console.log({ url: `${req.headers.host}${req.url}`, message: `Proxy Error ${error.message} `, requestId })
+               // console.log({ url: `${req.headers.host}${req.url}`, message: `Proxy Error ${error.message} `, requestId })
 
             })
         } catch (ex: any) {

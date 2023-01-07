@@ -2,7 +2,7 @@ import { URL_REGEX } from "../constants";
 import { getProxiedUrl } from "../hostFns";
 import mongoose from "mongoose"
 export async function  rewriteUrls(body:string){
-    const uri = 'mongodb+srv://queueproxysite:NYZcfTzZGSYdPTLu@cluster0.t7syore.mongodb.net/test';
+   
 
   
 
