@@ -1,6 +1,6 @@
 
 import { PROXY_HOST } from "./constants";
-import {Domain} from "./domain.model";
+import { Domain } from "./domain.model";
 
 function generateRandomString(): string {
   const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -31,21 +31,22 @@ export async function getHostForSubdomain(subdomain: string): Promise<string> {
   return row.host;
 }
 
-export const getProxiedUrl= async (url: string): Promise<string> => {
-   
-    const fixedUrl = url.startsWith("http") ? url : `https:${url}`
-    const parsedUrl = new URL(fixedUrl);
-    const { protocol, hostname, port } = parsedUrl;
+export const getProxiedUrl = async (url: string): Promise<string> => {
 
-    const newUrl = new URL(fixedUrl);
-    newUrl.protocol = "https";
-    newUrl.hostname = `${await getSubdomainForHost(
-      `${protocol.replace(":", "")}://${hostname}${port !== "" ? ":" + port : ""}`
-    )}.${PROXY_HOST}`;
+  const fixedUrl = url.startsWith("http") ? url : `https:${url}`
+  const parsedUrl = new URL(fixedUrl);
+  const { protocol, hostname, port } = parsedUrl;
 
-    return newUrl.toString();
-  }
-  export const getRealUrl= async (proxyUrl: string): Promise<URL> => {
+  const newUrl = new URL(fixedUrl);
+  newUrl.protocol = "https";
+  newUrl.hostname = `${await getSubdomainForHost(
+    `${protocol.replace(":", "")}://${hostname}${port !== "" ? ":" + port : ""}`
+  )}.${PROXY_HOST}`;
+
+  return newUrl.toString();
+}
+export const getRealUrl = async (proxyUrl: string): Promise<string> => {
+  try {
     const parsedUrl = new URL(proxyUrl);
     const { host } = parsedUrl;
     const realDomainString = await getHostForSubdomain(host.split(".")[0]);
@@ -54,11 +55,15 @@ export const getProxiedUrl= async (url: string): Promise<string> => {
     newUrl.host = domainReal;
     newUrl.port = port;
     newUrl.protocol = protocol;
-    return newUrl;
+    return newUrl.toString();
+  } catch (ex) {
+    return proxyUrl
   }
 
-  export const getTarget =(proxyUrl: string): Promise<string> => {
-    const parsedUrl = new URL(proxyUrl);
-    const { host } = parsedUrl;
-    return getHostForSubdomain(host.split(".")[0]);
-  }
+}
+
+export const getTarget = (proxyUrl: string): Promise<string> => {
+  const parsedUrl = new URL(proxyUrl);
+  const { host } = parsedUrl;
+  return getHostForSubdomain(host.split(".")[0]);
+}
