@@ -148,9 +148,9 @@ async function start() {
 
         }
     });
-
-    console.log("listening on port 5050")
-    server.listen(5050);
+    const port =process.env.PORT || "5050"
+    console.log(`listening on port ${port}`)
+    server.listen(parseInt(port));
 
 }
 start()
