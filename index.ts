@@ -12,10 +12,19 @@ import { getProxiedUrl, getRealUrl, getHostForSubdomain, getHostNameForSubdomain
 
 
 const baseHost = PROXY_HOST
-
+const uri = MONGODB_URI;
 
 async function start() {
-    const uri = MONGODB_URI;
+    if(!uri){
+        throw new Error("MongoDB Url not specified")
+      
+    }
+    if(!baseHost){
+        throw  new Error("Proxy host ENV variable not specified")
+       
+    }
+    
+  
     await mongoose.connect(uri)
         .then(() => {
             console.log('Successfully connected to MongoDB');
