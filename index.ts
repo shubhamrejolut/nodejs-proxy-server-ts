@@ -5,25 +5,17 @@ import http from 'http'
 import httpProxy from 'http-proxy'
 
 import url from 'url'
-import { PROXY_HOST } from './constants'
+import { MONGODB_URI, PROXY_HOST } from './constants'
 import { rewriteUrls } from './lib/rewriters'
 import { v4 } from 'uuid'
-import { getProxiedUrl, getRealUrl, getHostForSubdomain } from "./hostFns"
+import { getProxiedUrl, getRealUrl, getHostForSubdomain, getHostNameForSubdomain } from "./hostFns"
 
 
 const baseHost = PROXY_HOST
-// Create a proxy server with custom application logic
-//
 
-
-//
-// Create your custom server and just call `proxy.web()` to proxy
-// a web request to the target passed in the options
-// also you can use `proxy.ws()` to proxy a websockets request
-//
 
 async function start() {
-    const uri = 'mongodb+srv://queueproxysite:NYZcfTzZGSYdPTLu@cluster0.t7syore.mongodb.net/test?maxPoolSize=10';
+    const uri = MONGODB_URI;
     await mongoose.connect(uri)
         .then(() => {
             console.log('Successfully connected to MongoDB');
@@ -71,7 +63,7 @@ async function start() {
                 req.headers.referrer = await getRealUrl(referrer)
             }
             if (req.headers.host && req.headers.host !== "") {
-                req.headers.host = await getRealUrl(req.headers.host)
+                req.headers.host = await getHostNameForSubdomain(`${req.headers.host?.split(".")[0]}` )
             }
 
 

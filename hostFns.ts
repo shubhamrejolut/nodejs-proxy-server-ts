@@ -22,6 +22,8 @@ export async function getSubdomainForHost(host: string): Promise<string> {
   return row.subdomain;
 }
 
+
+
 export async function getHostForSubdomain(subdomain: string): Promise<string> {
   const row = await Domain.findOne({ subdomain });
 
@@ -30,9 +32,13 @@ export async function getHostForSubdomain(subdomain: string): Promise<string> {
   }
   return row.host;
 }
-
+export async function getHostNameForSubdomain(subdomain: string): Promise<string> {
+ const host = await getHostForSubdomain(subdomain)
+ const url = new URL(host)
+ return url.hostname
+}
 export const getProxiedUrl = async (url: string): Promise<string> => {
-
+  
   const fixedUrl = url.startsWith("http") ? url : `https:${url}`
   const parsedUrl = new URL(fixedUrl);
   const { protocol, hostname, port } = parsedUrl;
@@ -42,7 +48,7 @@ export const getProxiedUrl = async (url: string): Promise<string> => {
   newUrl.hostname = `${await getSubdomainForHost(
     `${protocol.replace(":", "")}://${hostname}${port !== "" ? ":" + port : ""}`
   )}.${PROXY_HOST}`;
-
+  
   return newUrl.toString();
 }
 export const getRealUrl = async (proxyUrl: string): Promise<string> => {
@@ -56,7 +62,10 @@ export const getRealUrl = async (proxyUrl: string): Promise<string> => {
     newUrl.port = port;
     newUrl.protocol = protocol;
     return newUrl.toString();
-  } catch (ex) {
+  } catch (ex: any) {
+    console.error("Couldn't rewrite", proxyUrl, ex.message)
+
+    console.error(ex)
     return proxyUrl
   }
 

@@ -19,10 +19,11 @@ export async function rewriteUrls(body: string) {
         const resolvedUrl = await getProxiedUrl(url)
         resolvedUrls[url] = resolvedUrl
     }))
+    
 
     for (const url of body.match(URL_REGEX) || []) {
-
-        output.replace(url, resolvedUrls[url])
+        const regex = new RegExp(url, "g")
+       output =  output.replace(regex, resolvedUrls[url])
     }
    
     return output
