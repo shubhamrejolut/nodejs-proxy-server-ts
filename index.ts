@@ -4,8 +4,9 @@ import { Domain } from "./domain.model"
 import http from 'http'
 import httpProxy from 'http-proxy'
 
+import Rollbar from 'rollbar'
 import url from 'url'
-import { MONGODB_URI, PROXY_HOST } from './constants'
+import { MONGODB_URI, PROXY_HOST, ROLLBAR_TOKEN } from './constants'
 import { rewriteUrls } from './lib/rewriters'
 import { v4 } from 'uuid'
 import { getProxiedUrl, getRealUrl, getHostForSubdomain, getHostNameForSubdomain } from "./hostFns"
@@ -13,7 +14,15 @@ import { getProxiedUrl, getRealUrl, getHostForSubdomain, getHostNameForSubdomain
 
 const baseHost = PROXY_HOST
 const uri = MONGODB_URI;
-
+const rollbar= new Rollbar({
+    accessToken: ROLLBAR_TOKEN,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    payload: {
+      code_version: '1.0.0',
+    }
+  });
+  
 async function start() {
     if(!uri){
         throw new Error("MongoDB Url not specified")
@@ -30,6 +39,7 @@ async function start() {
             console.log('Successfully connected to MongoDB');
         })
         .catch((error) => {
+            rollbar.error(error)
             console.log(`Error connecting to MongoDB: ${error}`);
             process.exit(101)
         });
@@ -138,6 +148,8 @@ async function start() {
 
             })
             proxy.on("error", (error) => {
+                rollbar.error(error, req, {requestedUrl: `${req.headers.host}${req.url}` })
+               
                 console.log({ url: `${req.headers.host}${req.url}`, message: `Proxy Error ${error.message} `, requestId })
                 res.end("ERror Loading the page")
 
@@ -145,6 +157,7 @@ async function start() {
         } catch (ex: any) {
             console.log({ url: `${req.headers.host}${req.url}`, message: `Caught Error ${ex.message} `, requestId })
             console.error(ex)
+            rollbar.error(ex, req, {requestedUrl: `${req.headers.host}${req.url}` })
             res.end("An error happened while loading the page")
 
         }
