@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "start": "ts-node index.ts",
-    "startlive": "nodemon index.ts"
+    "startlive": "nodemon index.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "@types/http-proxy": "^1.17.9",
