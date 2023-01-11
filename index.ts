@@ -14,26 +14,26 @@ import { getProxiedUrl, getRealUrl, getHostForSubdomain, getHostNameForSubdomain
 
 const baseHost = PROXY_HOST
 const uri = MONGODB_URI;
-const rollbar= new Rollbar({
+const rollbar = new Rollbar({
     accessToken: ROLLBAR_TOKEN,
     captureUncaught: true,
     captureUnhandledRejections: true,
     payload: {
-      code_version: '1.0.0',
+        code_version: '1.0.0',
     }
-  });
-  
+});
+
 async function start() {
-    if(!uri){
+    if (!uri) {
         throw new Error("MongoDB Url not specified")
-      
+
     }
-    if(!baseHost){
-        throw  new Error("Proxy host ENV variable not specified")
-       
+    if (!baseHost) {
+        throw new Error("Proxy host ENV variable not specified")
+
     }
-    
-  
+
+
     await mongoose.connect(uri)
         .then(() => {
             console.log('Successfully connected to MongoDB');
@@ -49,18 +49,18 @@ async function start() {
         const queryObject = url.parse(req.url!, true).query
         const subdomain = req.headers.host?.replace(baseHost, "").replace(/\.+$/, "")
         if (subdomain === "" || !subdomain && queryObject.url) {
-            
-            if(!queryObject.url){
+
+            if (!queryObject.url) {
                 res.writeHead(400, { "content-type": "application/json" })
-                return res.end(JSON.stringify({error: "No url was passed"}))
+                return res.end(JSON.stringify({ error: "No url was passed" }))
             }
-            if(Array.isArray(queryObject.url)){
+            if (Array.isArray(queryObject.url)) {
                 res.writeHead(400, { "content-type": "application/json" })
                 return res.end(JSON.stringify({ error: "Pass a single url" }))
             }
             res.writeHead(200, { "content-type": "application/json" })
             return res.end(JSON.stringify({ url: queryObject.url, proxy_url: await getProxiedUrl(queryObject.url) }))
-            
+
         }
 
         // You can define here your custom logic to handle the 
@@ -82,7 +82,7 @@ async function start() {
                 req.headers.referrer = await getRealUrl(referrer)
             }
             if (req.headers.host && req.headers.host !== "") {
-                req.headers.host = await getHostNameForSubdomain(`${req.headers.host?.split(".")[0]}` )
+                req.headers.host = await getHostNameForSubdomain(`${req.headers.host?.split(".")[0]}`)
             }
 
 
@@ -117,28 +117,29 @@ async function start() {
                         proxyRes.headers["location"] = await getProxiedUrl(location)
                     }
 
-                    const { 'content-length': cl, 'Access-Control-Allow-Origin':aco, ...headers } = proxyRes.headers
+                    const { 'content-length': cl, 'access-control-allow-origin': aco, "x-frame-options": xf, ...headers } = Object.fromEntries(Object.entries(proxyRes.headers).map(([key, value]) => ([key.toLowerCase(), value])))
 
                     headers["cache-control"] = "no-cache, no-store, must-revalidate"
                     headers["pragma"] = "no-cache"
-                    headers['expires']= '0'
-                    headers['real-url']= `${target}${req.url}`
-                  
-                    headers['Access-Control-Allow-Origin']= req.headers.origin && req.headers.origin!=="" ?  (await getProxiedUrl(req.headers.origin)).replace(/\/$/,"") : "*"
+                    headers['expires'] = '0'
+                    headers['real-url'] = `${target}${req.url}`
+
+                    headers['access-control-allow-origin'] = req.headers.origin && req.headers.origin !== "" ? (await getProxiedUrl(req.headers.origin)).replace(/\/$/, "") : "*"
                     //This should be origin
-                    headers['Access-Control-Allow-Methods']= "GET,POST,PUT,DELETE,HEAD"
-                   
+                    headers['access-control-allow-methods'] = "GET,POST,PUT,DELETE,HEAD"
+
+
 
                     res.writeHead(proxyRes.statusCode || 200, proxyRes.statusMessage, headers)
 
-                   
+
                     if (proxyRes.headers!['content-type']?.startsWith("text") || proxyRes.headers!['content-type']?.startsWith("application/json")) {
-                        
+
                         let replacedBody = await rewriteUrls(Buffer.concat(body).toString())
-                      
-                        if(proxyRes.headers!['content-type'].startsWith("text/html")){
-                           replacedBody+="<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy.js'></script>"
-                           replacedBody+="<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style.css'></link>"
+
+                        if (proxyRes.headers!['content-type'].startsWith("text/html")) {
+                            replacedBody += "<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy.js'></script>"
+                            replacedBody += "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style.css'></link>"
                         }
                         res.end(replacedBody)
                     }
@@ -148,8 +149,8 @@ async function start() {
 
             })
             proxy.on("error", (error) => {
-                rollbar.error(error, req, {requestedUrl: `${req.headers.host}${req.url}` })
-               
+                rollbar.error(error, req, { requestedUrl: `${req.headers.host}${req.url}` })
+
                 console.log({ url: `${req.headers.host}${req.url}`, message: `Proxy Error ${error.message} `, requestId })
                 res.end("ERror Loading the page")
 
@@ -157,12 +158,12 @@ async function start() {
         } catch (ex: any) {
             console.log({ url: `${req.headers.host}${req.url}`, message: `Caught Error ${ex.message} `, requestId })
             console.error(ex)
-            rollbar.error(ex, req, {requestedUrl: `${req.headers.host}${req.url}` })
+            rollbar.error(ex, req, { requestedUrl: `${req.headers.host}${req.url}` })
             res.end("An error happened while loading the page")
 
         }
     });
-    const port =process.env.PORT || "5050"
+    const port = process.env.PORT || "5050"
     console.log(`listening on port ${port}`)
     server.listen(parseInt(port));
 
