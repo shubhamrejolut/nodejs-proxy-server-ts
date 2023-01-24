@@ -138,8 +138,8 @@ async function start() {
                         let replacedBody = await rewriteUrls(Buffer.concat(body).toString())
 
                         if (proxyRes.headers!['content-type'].startsWith("text/html")) {
-                            replacedBody += "<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy5.js'></script>"
-                            replacedBody += "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style.css'></link>"
+                            replacedBody += "<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy6.js'></script>"
+                            replacedBody += "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style2.css'></link>"
                         }
                         res.end(replacedBody)
                     }
