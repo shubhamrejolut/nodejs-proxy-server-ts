@@ -11,6 +11,7 @@ import { rewriteUrls } from './lib/rewriters'
 import { v4 } from 'uuid'
 import { getProxiedUrl, getRealUrl, getHostForSubdomain, getHostNameForSubdomain } from "./hostFns"
 
+import zlib from 'zlib'
 
 const baseHost = PROXY_HOST
 const uri = MONGODB_URI;
@@ -48,6 +49,7 @@ async function start() {
         var proxy = httpProxy.createProxyServer({ changeOrigin: true, selfHandleResponse: true });
         const queryObject = url.parse(req.url!, true).query
         const subdomain = req.headers.host?.replace(baseHost, "").replace(/\.+$/, "")
+     
         if (subdomain === "" || !subdomain && queryObject.url) {
 
             if (!queryObject.url) {
@@ -58,6 +60,8 @@ async function start() {
                 res.writeHead(400, { "content-type": "application/json" })
                 return res.end(JSON.stringify({ error: "Pass a single url" }))
             }
+
+            
             res.writeHead(200, { "content-type": "application/json" })
             return res.end(JSON.stringify({ url: queryObject.url, proxy_url: await getProxiedUrl(queryObject.url) }))
 
@@ -111,11 +115,12 @@ async function start() {
 
                     const location = Array.isArray(proxyRes.headers.location) ? proxyRes.headers.location[0] : proxyRes.headers.location
 
-
+                    
                     if (location?.startsWith("ht")) {
                         //res.setHeader("location",getProxiedUrl(location) )
                         proxyRes.headers["location"] = await getProxiedUrl(location)
                     }
+                   // console.log("zlib dec", zlib.gunzipSync(Buffer.concat(body)).toString())
 
                     const { 'content-length': cl, 'access-control-allow-origin': aco, "x-frame-options": xf, ...headers } = Object.fromEntries(Object.entries(proxyRes.headers).map(([key, value]) => ([key.toLowerCase(), value])))
 
@@ -128,20 +133,21 @@ async function start() {
                     //This should be origin
                     headers['access-control-allow-methods'] = "GET,POST,PUT,DELETE,HEAD"
 
-
+                   
 
                     res.writeHead(proxyRes.statusCode || 200, proxyRes.statusMessage, headers)
-
-
+                    const isGzip = proxyRes.headers['content-encoding'] === 'gzip'
+                   
                     if (proxyRes.headers!['content-type']?.startsWith("text") || proxyRes.headers!['content-type']?.startsWith("application/json")) {
-
-                        let replacedBody = await rewriteUrls(Buffer.concat(body).toString())
+                        const textBody =(isGzip ? zlib.gunzipSync(Buffer.concat(body)) : Buffer.concat(body)).toString()
+                        let replacedBody = await rewriteUrls(textBody)
 
                         if (proxyRes.headers!['content-type'].startsWith("text/html")) {
                             replacedBody += "<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy6.js'></script>"
                             replacedBody += "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style2.css'></link>"
                         }
-                        res.end(replacedBody)
+                       
+                        res.end( isGzip ? zlib.gzipSync(replacedBody) : replacedBody)
                     }
                     else
                         res.end(Buffer.concat(body))

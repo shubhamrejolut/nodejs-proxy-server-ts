@@ -1,6 +1,7 @@
 import { URL_REGEX } from "../constants";
 import { getProxiedUrl } from "../hostFns";
 import mongoose from "mongoose"
+import fs from 'fs/promises'
 export async function rewriteUrls(body: string) {
 
 
@@ -25,6 +26,7 @@ export async function rewriteUrls(body: string) {
         const regex = new RegExp(url, "g")
        output =  output.replace(regex, resolvedUrls[url])
     }
-   
+
+
     return output
 }
