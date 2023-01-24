@@ -24,6 +24,8 @@ export async function rewriteUrls(body: string) {
 
     for (const url of body.match(URL_REGEX) || []) {
         const regex = new RegExp(url, "g")
+        if(url.startsWith("http://www.w3.org/2000/svg"))
+        continue
        output =  output.replace(regex, resolvedUrls[url])
     }
 
