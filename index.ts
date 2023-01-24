@@ -138,13 +138,15 @@ async function start() {
                     res.writeHead(proxyRes.statusCode || 200, proxyRes.statusMessage, headers)
                     const isGzip = proxyRes.headers['content-encoding'] === 'gzip'
                    
-                    if (proxyRes.headers!['content-type']?.startsWith("text") || proxyRes.headers!['content-type']?.startsWith("application/json")) {
+                    if (proxyRes.headers!['content-type']?.startsWith("text") || proxyRes.headers!['content-type']?.startsWith("application/json") ){
                         const textBody =(isGzip ? zlib.gunzipSync(Buffer.concat(body)) : Buffer.concat(body)).toString()
                         let replacedBody = await rewriteUrls(textBody)
-
+                        
                         if (proxyRes.headers!['content-type'].startsWith("text/html")) {
+                            replacedBody= "<script type='text/javascript'>window.top=self;</script>" + replacedBody;
                             replacedBody += "<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy6.js'></script>"
                             replacedBody += "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style2.css'></link>"
+                            replacedBody+ "<script type='text/javascript'>window.top=self;</script>"
                         }
                        
                         res.end( isGzip ? zlib.gzipSync(replacedBody) : replacedBody)
