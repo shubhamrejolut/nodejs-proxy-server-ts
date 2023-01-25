@@ -122,7 +122,7 @@ async function start() {
                     }
                    // console.log("zlib dec", zlib.gunzipSync(Buffer.concat(body)).toString())
 
-                    const { 'content-length': cl, 'access-control-allow-origin': aco, "x-frame-options": xf, ...headers } = Object.fromEntries(Object.entries(proxyRes.headers).map(([key, value]) => ([key.toLowerCase(), value])))
+                    const { 'content-length': cl, 'access-control-allow-origin': aco, 'content-security-policy': csp,"x-frame-options": xf, ...headers } = Object.fromEntries(Object.entries(proxyRes.headers).map(([key, value]) => ([key.toLowerCase(), value])))
 
                     headers["cache-control"] = "no-cache, no-store, must-revalidate"
                     headers["pragma"] = "no-cache"
@@ -146,7 +146,7 @@ async function start() {
                             replacedBody= "<script type='text/javascript'>window.top=self;</script>" + replacedBody;
                             replacedBody += "<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy6.js'></script>"
                             replacedBody += "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style2.css'></link>"
-                            replacedBody+ "<script type='text/javascript'>window.top=self;</script>"
+                            
                         }
                        
                         res.end( isGzip ? zlib.gzipSync(replacedBody) : replacedBody)
