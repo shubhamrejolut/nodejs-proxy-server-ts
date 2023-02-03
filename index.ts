@@ -6,7 +6,7 @@ import httpProxy from 'http-proxy'
 
 import Rollbar from 'rollbar'
 import url from 'url'
-import { INJECT_SCRIPT, MONGODB_URI, PROXY_HOST, ROLLBAR_TOKEN } from './constants'
+import {  MONGODB_URI, PROXY_HOST, ROLLBAR_TOKEN } from './constants'
 import { injectScript, rewriteUrls } from './lib/rewriters'
 import { v4 } from 'uuid'
 import { getProxiedUrl, getRealUrl, getHostForSubdomain, getHostNameForSubdomain } from "./hostFns"
@@ -154,8 +154,8 @@ async function start() {
                                 replacedBody = $.root().html()!
                             }
                           
-                            // replacedBody += "<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy6.js'></script>"
-                            // replacedBody += "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style2.css'></link>"
+                            replacedBody += "<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy6.js'></script>"
+                            replacedBody += "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style2.css'></link>"
                             
                         }
                        
