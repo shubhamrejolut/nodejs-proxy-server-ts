@@ -32,3 +32,16 @@ export async function rewriteUrls(body: string) {
 
     return output
 }
+
+export function injectScript(script?: string|null){
+    if(!script)
+        return ''
+    return `
+    {
+        let location = window.location;
+        let top = window;
+        ${script}
+    }
+
+`
+}

@@ -6,12 +6,13 @@ import httpProxy from 'http-proxy'
 
 import Rollbar from 'rollbar'
 import url from 'url'
-import { MONGODB_URI, PROXY_HOST, ROLLBAR_TOKEN } from './constants'
-import { rewriteUrls } from './lib/rewriters'
+import { INJECT_SCRIPT, MONGODB_URI, PROXY_HOST, ROLLBAR_TOKEN } from './constants'
+import { injectScript, rewriteUrls } from './lib/rewriters'
 import { v4 } from 'uuid'
 import { getProxiedUrl, getRealUrl, getHostForSubdomain, getHostNameForSubdomain } from "./hostFns"
 
 import zlib from 'zlib'
+import * as cheerio  from 'cheerio'
 
 const baseHost = PROXY_HOST
 const uri = MONGODB_URI;
@@ -143,9 +144,18 @@ async function start() {
                         let replacedBody = await rewriteUrls(textBody)
                         
                         if (proxyRes.headers!['content-type'].startsWith("text/html")) {
-                            replacedBody= "<script type='text/javascript'>window.top=self;</script>" + replacedBody;
-                            replacedBody += "<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy6.js'></script>"
-                            replacedBody += "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style2.css'></link>"
+                            const $ = cheerio.load(replacedBody)
+                            if($('script').length>0){
+                                $('script').map(function(){
+                                    const script = $(this).html()
+                                   
+                                    $(this).html(injectScript(script))
+                                })
+                                replacedBody = $.root().html()!
+                            }
+                          
+                            // replacedBody += "<script type='text/javascript' src='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/proxy6.js'></script>"
+                            // replacedBody += "<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/masudhossain/proxy-js@main/style2.css'></link>"
                             
                         }
                        
