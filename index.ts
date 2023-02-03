@@ -147,9 +147,14 @@ async function start() {
                             const $ = cheerio.load(replacedBody)
                             if($('script').length>0){
                                 $('script').map(function(){
-                                    const script = $(this).html()
+                                    const $this = $(this)
+                                    const scriptType = $(this).attr('type')
+                                    if(scriptType==="text/javascript" || scriptType=="" || !scriptType || scriptType=="javascript"){
+                                        const script = $(this).html()
                                    
-                                    $(this).html(injectScript(script))
+                                        $(this).html(injectScript(script))
+                                    }
+                                  
                                 })
                                 replacedBody = $.root().html()!
                             }
