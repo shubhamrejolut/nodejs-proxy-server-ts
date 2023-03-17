@@ -54,9 +54,9 @@ export const getProxiedUrl = async (
   );
   newUrl.hostname = `${h}.${PROXY_HOST}`;
   console.log(`${h}.${PROXY_HOST}`);
-  if (hashed) {
-    return `${h}.${SUBDOMAIN}`;
-  }
+  // if (hashed) {
+  //   return `${h}.${SUBDOMAIN}`;
+  // }
   return newUrl.toString();
 };
 
