@@ -1,4 +1,4 @@
-import { PROXY_HOST, PORT } from "./constants";
+import { PROXY_HOST, PORT, SUBDOMAIN } from "./constants";
 import { Domain } from "./domain.model";
 
 function generateRandomString(): string {
@@ -55,7 +55,7 @@ export const getProxiedUrl = async (
   newUrl.hostname = `${h}.${PROXY_HOST}`;
   console.log(`${h}.${PROXY_HOST}`);
   if (hashed) {
-    return `${h}.localhost:${PORT}`;
+    return `${h}.${SUBDOMAIN}`;
   }
   return newUrl.toString();
 };
