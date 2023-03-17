@@ -87,6 +87,7 @@ async function start() {
     const requestId = v4();
     //console.log({ url: `${req.headers.host}${req.url}`, message: "Started Processing url", requestId })
     try {
+      console.log(`${req.headers.host?.split(".")[1]}`, "Subdomain");
       const target = await getHostForSubdomain(
         `${req.headers.host?.split(".")[0]}`
       );
@@ -103,7 +104,6 @@ async function start() {
         req.headers.referrer = await getRealUrl(referrer);
       }
       if (req.headers.host && req.headers.host !== "") {
-        console.log(`${req.headers.host?.split(".")[0]}`, "Subdomain");
         req.headers.host = await getHostNameForSubdomain(
           `${req.headers.host?.split(".")[0]}`
         );
