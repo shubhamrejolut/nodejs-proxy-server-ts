@@ -57,10 +57,13 @@ async function start() {
     });
 
     const queryObject = url.parse(req.url!, true).query;
+    console.log(req.headers.host, baseHost, ":::::::::::::::TCL::");
+
     const subdomain = req.headers.host
       ?.replace(baseHost, "")
       .replace(/\.+$/, "");
 
+    // if (subdomain === "" || (!subdomain && queryObject.url)) {
     if (subdomain === "" || (!subdomain && queryObject.url)) {
       if (!queryObject.url) {
         res.writeHead(400, { "content-type": "application/json" });

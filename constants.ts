@@ -3,7 +3,6 @@ dotenv.config();
 
 export const PROXY_HOST = process.env.PROXY_HOST;
 export const PORT = process.env.PORT;
-export const SUBDOMAIN = process.env.SUBDOMAIN;
 
 export const URL_REGEX =
   /(http(s)?:)\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
