@@ -103,6 +103,7 @@ async function start() {
         req.headers.referrer = await getRealUrl(referrer);
       }
       if (req.headers.host && req.headers.host !== "") {
+        console.log(`${req.headers.host?.split(".")[0]}`, "Subdomain");
         req.headers.host = await getHostNameForSubdomain(
           `${req.headers.host?.split(".")[0]}`
         );
