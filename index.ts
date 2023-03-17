@@ -61,12 +61,11 @@ async function start() {
       ?.replace(baseHost, "")
       .replace(/\.+$/, "");
 
-    if (queryObject.url) {
+    if (subdomain === "" || (!subdomain && queryObject.url)) {
       if (!queryObject.url) {
         res.writeHead(400, { "content-type": "application/json" });
         return res.end(JSON.stringify({ error: "No url was passed" }));
       }
-
       if (Array.isArray(queryObject.url)) {
         res.writeHead(400, { "content-type": "application/json" });
         return res.end(JSON.stringify({ error: "Pass a single url" }));
@@ -76,7 +75,7 @@ async function start() {
       return res.end(
         JSON.stringify({
           url: queryObject.url,
-          proxy_url: await getProxiedUrl(queryObject.url, true),
+          proxy_url: await getProxiedUrl(queryObject.url),
         })
       );
     }
