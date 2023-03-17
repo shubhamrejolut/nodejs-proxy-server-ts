@@ -1,11 +1,15 @@
-import * as dotenv from 'dotenv'
-dotenv.config()
+import * as dotenv from "dotenv";
+dotenv.config();
 
-export const PROXY_HOST= process.env.PROXY_HOST
-export const URL_REGEX = /(http(s)?:)\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g
-export const MONGODB_URI=process.env.MONGODB_URI
-export const ROLLBAR_TOKEN= process.env.ROLLBAR_TOKEN
-export const INJECT_SCRIPT_OLD=`
+export const PROXY_HOST = process.env.PROXY_HOST;
+export const PORT = process.env.PORT;
+
+export const URL_REGEX =
+  /(http(s)?:)\/\/[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
+export const MONGODB_URI = process.env.MONGODB_URI;
+export const ROLLBAR_TOKEN = process.env.ROLLBAR_TOKEN;
+export const INJECT_SCRIPT_OLD = `
+
 window._window= window;
 
 
@@ -54,13 +58,13 @@ function $PastelGetVariable(name) {
     let self = $PastelGetVariable('self');
     let window = $PastelGetVariable('window');
     let globalThis = $PastelGetVariable('globalThis');
-`
+`;
 
-export const INJECT_SCRIPT=`
+export const INJECT_SCRIPT = `
 {
    
     let location = window.location;
     let top = window;
    
    
-`
+`;
